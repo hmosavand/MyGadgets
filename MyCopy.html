@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تبدیل کاراکترهای سفارشی</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            width: 90%;
+            max-width: 900px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .text-box-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .text-box-container {
+                flex-direction: row;
+            }
+        }
+        
+        .text-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .char-replace-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .char-pair {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .char-input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .arrow {
+            font-size: 18px;
+            color: #3498db;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            gap: 15px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .add-char-btn {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .remove-char-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .info-box {
+            background-color: #e8f4fc;
+            border-right: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .char-count {
+            text-align: left;
+            margin-top: 5px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #2ecc71;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .auto-copy-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        
+        .auto-copy-option input {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .char-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تبدیل کاراکترهای سفارشی</h1>
+        
+        <p class="description">
+            کاراکترهای مورد نظر برای تبدیل را مشخص کنید و متن خود را وارد نمایید.
+        </p>
+        
+        <div class="char-replace-container" id="charReplaceContainer">
+            <!-- جفت کاراکترها به صورت داینامیک اضافه می‌شوند -->
+        </div>
+        
+        <div class="char-controls">
+            <button class="add-char-btn" id="addCharBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                افزودن کاراکتر جدید
+            </button>
+            <button class="remove-char-btn" id="removeCharBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                حذف آخرین کاراکتر
+            </button>
+        </div>
+        
+        <div class="text-box-container">
+            <div class="text-box">
+                <label for="inputText">متن اصلی:</label>
+                <textarea id="inputText" placeholder="متن خود را اینجا وارد کنید..."></textarea>
+                <div class="char-count">تعداد کاراکترها: <span id="inputCount">0</span></div>
+            </div>
+            
+            <div class="text-box">
+                <label for="outputText">متن تبدیل شده:</label>
+                <textarea id="outputText" placeholder="متن تبدیل شده در اینجا نمایش داده می‌شود..." readonly></textarea>
+                <div class="char-count">تعداد کاراکترها: <span id="outputCount">0</span></div>
+            </div>
+        </div>
+        
+        <div class="auto-copy-option">
+            <input type="checkbox" id="autoCopy" checked>
+            <label for="autoCopy">کپی خودکار متن تبدیل شده در حافظه</label>
+        </div>
+        
+        <div class="button-container">
+            <button id="convertBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                تبدیل و کپی
+            </button>
+            <button id="copyBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                فقط کپی
+            </button>
+        </div>
+        
+        <div class="info-box">
+            <h3>راهنما:</h3>
+            <p>1. با استفاده از دکمه "افزودن کاراکتر جدید" می‌توانید جفت کاراکترهای بیشتری برای تبدیل اضافه کنید.</p>
+            <p>2. در کادر سمت راست، کاراکتر اصلی و در کادر سمت چپ، کاراکتر جایگزین را وارد کنید.</p>
+            <p>3. پس از وارد کردن متن، دکمه "تبدیل و کپی" را بزنید تا تبدیل انجام شده و متن در حافظه کپی شود.</p>
+            <p>4. برای تبدیل پرانتز انگلیسی به فارسی می‌توانید از پیش‌فرض برنامه استفاده کنید.</p>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        متن با موفقیت کپی شد!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const convertBtn = document.getElementById('convertBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const inputCount = document.getElementById('inputCount');
+            const outputCount = document.getElementById('outputCount');
+            const notification = document.getElementById('notification');
+            const autoCopyCheckbox = document.getElementById('autoCopy');
+            const charReplaceContainer = document.getElementById('charReplaceContainer');
+            const addCharBtn = document.getElementById('addCharBtn');
+            const removeCharBtn = document.getElementById('removeCharBtn');
+            
+            // آرایه برای ذخیره جفت کاراکترها
+            let charPairs = [];
+            
+            // تابع ایجاد یک جفت کاراکتر جدید
+            function createCharPair() {
+                const charPair = {
+                    id: Date.now(), // شناسه منحصر به فرد
+                    from: '',
+                    to: ''
+                };
+                
+                charPairs.push(charPair);
+                renderCharPairs();
+                
+                return charPair;
+            }
+            
+            // تابع حذف یک جفت کاراکتر
+            function removeCharPair() {
+                if (charPairs.length > 1) {
+                    charPairs.pop();
+                    renderCharPairs();
+                }
+            }
+            
+            // تابع رندر جفت کاراکترها در صفحه
+            function renderCharPairs() {
+                charReplaceContainer.innerHTML = '';
+                
+                charPairs.forEach((pair, index) => {
+                    const charPairElement = document.createElement('div');
+                    charPairElement.className = 'char-pair';
+                    
+                    charPairElement.innerHTML = `
+                        <input type="text" 
+                               class="char-input from-char" 
+                               placeholder="کاراکتر اصلی"
+                               value="${pair.from}"
+                               maxlength="1"
+                               data-id="${pair.id}">
+                        <span class="arrow">→</span>
+                        <input type="text" 
+                               class="char-input to-char" 
+                               placeholder="کاراکتر جایگزین"
+                               value="${pair.to}"
+                               maxlength="1"
+                               data-id="${pair.id}">
+                    `;
+                    
+                    charReplaceContainer.appendChild(charPairElement);
+                });
+                
+                // اضافه کردن event listeners برای فیلدهای ورودی
+                document.querySelectorAll('.from-char').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const id = this.getAttribute('data-id');
+                        const pair = charPairs.find(p => p.id == id);
+                        if (pair) pair.from = this.value;
+                    });
+                });
+                
+                document.querySelectorAll('.to-char').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const id = this.getAttribute('data-id');
+                        const pair = charPairs.find(p => p.id == id);
+                        if (pair) pair.to = this.value;
+                    });
+                });
+            }
+            
+            // تابع نمایش نوتیفیکیشن
+            function showNotification() {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }
+            
+            // تابع کپی به کلیپ‌بورد
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification();
+                }).catch(err => {
+                    console.error('خطا در کپی کردن: ', err);
+                    // روش جایگزین برای مرورگرهای قدیمی
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification();
+                });
+            }
+            
+            // تابع تبدیل کاراکترها
+            function convertText(text) {
+                let result = text;
+                
+                // تبدیل بر اساس جفت کاراکترهای تعریف شده
+                charPairs.forEach(pair => {
+                    if (pair.from && pair.to) {
+                        const regex = new RegExp(escapeRegExp(pair.from), 'g');
+                        result = result.replace(regex, pair.to);
+                    }
+                });
+                
+                return result;
+            }
+            
+            // تابع escape برای regex
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            
+            // آپدیت تعداد کاراکترها
+            inputText.addEventListener('input', function() {
+                inputCount.textContent = inputText.value.length;
+            });
+            
+            outputText.addEventListener('input', function() {
+                outputCount.textContent = outputText.value.length;
+            });
+            
+            // دکمه تبدیل و کپی
+            convertBtn.addEventListener('click', function() {
+                let text = inputText.value;
+                
+                if (!text.trim()) {
+                    alert('لطفاً متنی برای تبدیل وارد کنید.');
+                    return;
+                }
+                
+                // تبدیل کاراکترها
+                text = convertText(text);
+                
+                outputText.value = text;
+                outputCount.textContent = text.length;
+                
+                // کپی خودکار اگر فعال باشد
+                if (autoCopyCheckbox.checked) {
+                    copyToClipboard(text);
+                }
+                
+                // افکت برای دکمه
+                convertBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    convertBtn.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // دکمه فقط کپی
+            copyBtn.addEventListener('click', function() {
+                const text = outputText.value;
+                
+                if (!text.trim()) {
+                    alert('هیچ متنی برای کپی کردن وجود ندارد.');
+                    return;
+                }
+                
+                copyToClipboard(text);
+                
+                // افکت برای دکمه
+                copyBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    copyBtn.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // دکمه افزودن کاراکتر جدید
+            addCharBtn.addEventListener('click', function() {
+                createCharPair();
+            });
+            
+            // دکمه حذف کاراکتر
+            removeCharBtn.addEventListener('click', function() {
+                removeCharPair();
+            });
+            
+            // مقداردهی اولیه - ایجاد یک جفت کاراکتر پیش‌فرض برای پرانتز
+            createCharPair();
+            charPairs[0].from = '(';
+            charPairs[0].to = '(';
+            
+            // ایجاد جفت کاراکتر دوم برای پرانتز بسته
+            createCharPair();
+            charPairs[1].from = ')';
+            charPairs[1].to = ')';
+            
+            renderCharPairs();
+            
+            // مقداردهی اولیه برای نمایش تعداد کاراکترها
+            inputCount.textContent = inputText.value.length;
+            outputCount.textContent = outputText.value.length;
+        });
+    </script>
+</body>
+</html>
